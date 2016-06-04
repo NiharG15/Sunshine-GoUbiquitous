@@ -24,6 +24,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
@@ -36,6 +38,11 @@ import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.muzei.WeatherMuzeiSource;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,6 +93,12 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int LOCATION_STATUS_SERVER_INVALID = 2;
     public static final int LOCATION_STATUS_UNKNOWN = 3;
     public static final int LOCATION_STATUS_INVALID = 4;
+
+    public static final String WATCH_DATA_HIGHTEMP = "high_temp";
+    public static final String WATCH_DATA_LOWTEMP = "low_temp";
+    public static final String WATCH_DATA_COND = "weather_condition";
+
+    GoogleApiClient mGoogleApiClient;
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -350,7 +363,45 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
             setLocationStatus(getContext(), LOCATION_STATUS_OK);
+            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                        @Override
+                        public void onConnected(@Nullable Bundle bundle) {
+                            String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
 
+                            String locationSetting = Utility.getPreferredLocation(getContext());
+                            Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                                    locationSetting, System.currentTimeMillis());
+                            Cursor c = getContext().getContentResolver().query(weatherForLocationUri, null, null, null, sortOrder);
+                            if (c != null && c.moveToFirst()) {
+                                double high = c.getDouble(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP));
+                                String highString = Utility.formatTemperature(getContext(), high);
+                                double low = c.getDouble(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP));
+                                String lowString = Utility.formatTemperature(getContext(), low);
+                                PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/weather_data");
+                                DataMap mDataMap = dataMapRequest.getDataMap();
+                                mDataMap.putString(WATCH_DATA_HIGHTEMP, highString);
+                                mDataMap.putString(WATCH_DATA_LOWTEMP, lowString);
+                                Log.d("Weather cond", String.valueOf(c.getInt(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID))));
+                                mDataMap.putInt(WATCH_DATA_COND, c.getInt(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID)));
+                                Wearable.DataApi.putDataItem(mGoogleApiClient, dataMapRequest.asPutDataRequest());
+                                mGoogleApiClient.disconnect();
+                            }
+                        }
+
+                        @Override
+                        public void onConnectionSuspended(int i) {
+
+                        }
+                    })
+                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                        @Override
+                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+                        }
+                    })
+                    .addApi(Wearable.API).build();
+            mGoogleApiClient.connect();
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#000000</color>
+    <color name="digital_text">#ffffff</color>
+
+    <color name="primary_dark">#0288D1</color>  <!-- 700 -->
+    <color name="separator">#96ffffff</color>
+    <color name="semitrans_white">#9dffffff</color>
+</resources>
