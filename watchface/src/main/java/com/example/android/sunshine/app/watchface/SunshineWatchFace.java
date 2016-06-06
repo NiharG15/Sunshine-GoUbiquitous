@@ -313,6 +313,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 boolean antiAlias = !inAmbientMode;
                 mTimeText.getPaint().setAntiAlias(antiAlias);
                 mDateText.getPaint().setAntiAlias(antiAlias);
+                mAltWeather.getPaint().setAntiAlias(antiAlias);
             }
 
             // Whether the timer should be running depends on whether we're visible (as well as
