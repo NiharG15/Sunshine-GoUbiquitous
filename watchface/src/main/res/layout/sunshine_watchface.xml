@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"
         android:layout_marginTop="32dp"
-        android:textSize="44sp"
+        android:textSize="48sp"
         tools:text="10:14" />
 
     <TextView
@@ -26,6 +26,7 @@
         tools:text="Sat, Jun 4 2016" />
 
     <FrameLayout
+        android:id="@+id/separator_strip"
         android:layout_height="1dp"
         android:layout_width="156dp"
         android:layout_gravity="center_horizontal"
@@ -38,7 +39,7 @@
         android:layout_width="50dp"
         tools:src="@drawable/preview_digital"
         android:layout_gravity="top|start"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="128dp"
         android:contentDescription="@string/cd_weather_condition" />
 
@@ -47,8 +48,8 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="top|center"
-        android:layout_marginTop="138dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="134dp"
+        android:layout_marginStart="16dp"
         android:textSize="26sp"
         tools:text="28°" />
 
@@ -57,9 +58,23 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="top|center"
-        android:layout_marginTop="138dp"
+        android:layout_marginTop="134dp"
         android:layout_marginStart="56dp"
         android:textSize="24sp"
         android:textColor="@color/semitrans_white"
         tools:text="16°" />
+
+    <TextView
+        android:id="@+id/altWeather"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="138dp"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-light"
+        android:visibility="invisible"
+        android:textAlignment="center"
+        android:lineSpacingExtra="4dp"
+        android:bufferType="spannable"
+        tools:text="Drizzle" />
 </FrameLayout>
