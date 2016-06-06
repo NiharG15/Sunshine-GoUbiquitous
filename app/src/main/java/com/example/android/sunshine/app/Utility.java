@@ -17,12 +17,26 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.format.Time;
+import android.util.Log;
 
+import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -574,5 +588,55 @@ public class Utility {
         SharedPreferences.Editor spe = sp.edit();
         spe.putInt(c.getString(R.string.pref_location_status_key), SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
         spe.apply();
+    }
+
+    public static void sendDataToWatch(final Context context, final boolean urgent) {
+        final GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API).build();
+        googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(@Nullable Bundle bundle) {
+                String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+
+                String locationSetting = Utility.getPreferredLocation(context);
+                Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                        locationSetting, System.currentTimeMillis());
+                Cursor c = context.getContentResolver().query(weatherForLocationUri, null, null, null, sortOrder);
+                if (c != null && c.moveToFirst()) {
+                    double high = c.getDouble(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP));
+                    String highString = Utility.formatTemperature(context, high);
+                    double low = c.getDouble(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP));
+                    String lowString = Utility.formatTemperature(context, low);
+                    PutDataMapRequest dataMapRequest = PutDataMapRequest.create("/weather_data");
+                    DataMap mDataMap = dataMapRequest.getDataMap();
+                    mDataMap.putString(SunshineSyncAdapter.WATCH_DATA_HIGHTEMP, highString);
+                    mDataMap.putString(SunshineSyncAdapter.WATCH_DATA_LOWTEMP, lowString);
+                    Log.d("Weather cond", String.valueOf(c.getInt(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID))));
+                    mDataMap.putInt(SunshineSyncAdapter.WATCH_DATA_COND, c.getInt(c.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID)));
+                    mDataMap.putLong("time", System.currentTimeMillis());
+                    PendingResult<DataApi.DataItemResult> pendingResult = null;
+                    if (urgent) {
+                        pendingResult = Wearable.DataApi.putDataItem(googleApiClient, dataMapRequest.asPutDataRequest().setUrgent());
+                    } else {
+                        pendingResult = Wearable.DataApi.putDataItem(googleApiClient, dataMapRequest.asPutDataRequest());
+                    }
+                    pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override
+                        public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
+                            googleApiClient.disconnect();
+                        }
+                    });
+                }
+                if (c != null) {
+                    c.close();
+                }
+            }
+
+            @Override
+            public void onConnectionSuspended(int i) {
+
+            }
+        });
+        googleApiClient.connect();
     }
 }
