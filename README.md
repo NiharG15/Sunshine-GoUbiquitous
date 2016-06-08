@@ -3,6 +3,10 @@ Advanced Android Sample App
 
 Synchronizes weather information from OpenWeatherMap on Android Phones and Tablets. Used in the Udacity Advanced Android course.
 
+OpenWeatherMap API Key
+----------------------
+The API key for OpenWeatherMap should be assigned to 'MyOpenWeatherMapApiKey' in gradle.properties file
+
 Pre-requisites
 --------------
 Android SDK 21 or Higher
