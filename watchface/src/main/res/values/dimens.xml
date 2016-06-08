@@ -5,4 +5,7 @@
     <dimen name="digital_x_offset">15dp</dimen>
     <dimen name="digital_x_offset_round">25dp</dimen>
     <dimen name="digital_y_offset">90dp</dimen>
+    <dimen name="clock_size">48sp</dimen>
+    <dimen name="date_size">16sp</dimen>
+    <dimen name="square_image_padding_start">28dp</dimen>
 </resources>

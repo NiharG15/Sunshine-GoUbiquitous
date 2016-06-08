@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"
         android:layout_marginTop="32dp"
-        android:textSize="48sp"
+        android:textSize="@dimen/clock_size"
         tools:text="10:14" />
 
     <TextView
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_gravity="center|top"
         android:layout_marginTop="92dp"
-        android:textSize="16sp"
+        android:textSize="@dimen/date_size"
         tools:text="Sat, Jun 4 2016" />
 
     <FrameLayout
@@ -37,7 +37,7 @@
         android:id="@+id/weatherCondition"
         android:layout_height="50dp"
         android:layout_width="50dp"
-        tools:src="@drawable/preview_digital"
+        tools:src="@drawable/ic_rain"
         android:layout_gravity="top|start"
         android:layout_marginStart="40dp"
         android:layout_marginTop="128dp"

@@ -118,6 +118,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         }
     }
 
+    // Layout based watch face based on the code from https://sterlingudell.wordpress.com/2015/05/10/layout-based-watch-faces-for-android-wear/
     private class Engine extends CanvasWatchFaceService.Engine implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
@@ -282,10 +283,10 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             // Load resources that have alternate values for round watches.
             Resources resources = SunshineWatchFace.this.getResources();
             boolean isRound = insets.isRound();
-            mXOffset = resources.getDimension(isRound
-                    ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
-            float textSize = resources.getDimension(isRound
-                    ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
+            if (!isRound) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mWeatherImage.getLayoutParams();
+                params.setMarginStart(resources.getDimensionPixelSize(R.dimen.square_image_padding_start));
+            }
 
         }
 
