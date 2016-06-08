@@ -1,6 +1,8 @@
-package com.example.android.sunshine.app.watchface;
+package com.example.android.sunshine.app;
 
 import android.content.Context;
+
+import com.example.android.sunshine.app.watchface.R;
 
 /**
  * Created by niharg on 6/4/16 at 3:12 PM.
